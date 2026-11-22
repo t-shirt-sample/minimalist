@@ -2745,23 +2745,6 @@
         updateGitHubStatusUI();
       };
 
-      const switchAdminTab = (tabName) => {
-        State.admin.activeTab = tabName;
-        const tabs = ['products', 'settings', 'audit'];
-        tabs.forEach((t) => {
-          document.getElementById(`admin-tab-${t}`).classList.toggle('hidden', t !== tabName);
-        });
-        document.querySelectorAll('.admin-tab-btn').forEach((btn) => {
-          const active = btn.dataset.adminTab === tabName;
-          btn.classList.toggle('border-zinc-950', active);
-          btn.classList.toggle('text-zinc-950', active);
-          btn.classList.toggle('font-bold', active);
-          btn.classList.toggle('border-transparent', !active);
-          btn.classList.toggle('text-zinc-500', !active);
-        });
-        if (tabName === 'audit') renderAuditChecklist();
-      };
-
       const renderAdminStats = () => {
         const totalSkus = State.products.length;
         const totalStock = State.products.reduce((acc, p) => acc + (Number(p.stock) || 0), 0);
@@ -2967,6 +2950,282 @@
           },
           {
             label: 'QA Engineer — Validasi Nomor WhatsApp Checkout',
+            status: Security.normalizeWAPhone(State.settings.waNumber).length >= 10 ? 'Valid' : 'Perlu Cek',
+            ok: Security.normalizeWAPhone(State.settings.waNumber).length >= 10
+          }
+        ];
+
+        listEl.innerHTML = items
+          .map(
+            (item) => `
+              <li class="flex items-center justify-between gap-3 p-2.5 rounded-xl bg-zinc-50 border border-zinc-200/80">
+                <span class="font-medium text-zinc-700">${Security.escapeHTML(item.label)}</span>
+                <span class="shrink-0 px-2.5 py-0.5 rounded-full text-[11px] font-bold ${
+                  item.ok ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'
+                }">${Security.escapeHTML(item.status)}</span>
+              </li>
+            `
+          )
+          .join('');
+      };
+
+      /* =======================================================================
+         11. EVENT BINDINGS
+         ======================================================================= */
+      const bindEvents = () => {
+        // Announcement Bar Promo Copy
+        document.getElementById('copy-promo-btn').addEventListener('click', () => {
+          const code = State.settings.promoCode || 'KANA10';
+          if (copyTextToClipboard(code)) {
+            showToast(`Kode promo "${code}" berhasil disalin!`, 'success');
+          } else {
+            showToast(`Gunakan kode promo: ${code}`, 'info');
+          }
+        });
+
+        // Size Guide Modals
+        document.querySelectorAll('[data-open-size-guide]').forEach((btn) => {
+          btn.addEventListener('click', () => {
+            const modal = document.getElementById('size-guide-modal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+          });
+        });
+        document.getElementById('close-size-guide').addEventListener('click', () => {
+          const modal = document.getElementById('size-guide-modal');
+          modal.classList.add('hidden');
+          modal.classList.remove('flex');
+        });
+        document.getElementById('size-guide-modal').addEventListener('click', (e) => {
+          if (e.target.id === 'size-guide-modal') {
+            e.currentTarget.classList.add('hidden');
+            e.currentTarget.classList.remove('flex');
+          }
+        });
+
+        // Catalog Search, Sort & Category Filtering
+        document.getElementById('catalog-search').addEventListener('input', (e) => {
+          State.filters.search = e.target.value;
+          renderCatalog();
+        });
+        document.getElementById('catalog-sort').addEventListener('change', (e) => {
+          State.filters.sort = e.target.value;
+          renderCatalog();
+        });
+        document.getElementById('category-filters').addEventListener('click', (e) => {
+          const btn = e.target.closest('[data-category]');
+          if (!btn) return;
+          State.filters.category = btn.dataset.category;
+          renderCatalog();
+        });
+        document.getElementById('reset-filter-btn').addEventListener('click', () => {
+          State.filters = { search: '', category: 'Semua', sort: 'featured' };
+          document.getElementById('catalog-search').value = '';
+          document.getElementById('catalog-sort').value = 'featured';
+          renderCatalog();
+        });
+
+        // Product Grid Delegation (Open Detail / Quick Add)
+        document.getElementById('product-grid').addEventListener('click', (e) => {
+          const quickAddBtn = e.target.closest('[data-quick-add]');
+          if (quickAddBtn) {
+            const prod = State.products.find((p) => p.id === quickAddBtn.dataset.quickAdd);
+            if (prod) {
+              const defaultSize = (prod.sizes && prod.sizes[0]) || 'M';
+              addToCart(prod.id, defaultSize, 1);
+            }
+            return;
+          }
+          const openBtn = e.target.closest('[data-open-product]');
+          if (openBtn) {
+            openProductModal(openBtn.dataset.openProduct);
+          }
+        });
+
+        // Product Detail Modal Interactions
+        document.getElementById('close-product-modal').addEventListener('click', closeProductModal);
+        document.getElementById('product-modal').addEventListener('click', (e) => {
+          if (e.target.id === 'product-modal') closeProductModal();
+        });
+        document.getElementById('pm-sizes').addEventListener('click', (e) => {
+          const btn = e.target.closest('[data-select-size]');
+          if (!btn) return;
+          State.selectedModalSize = btn.dataset.selectSize;
+          renderModalSizes();
+        });
+        document.getElementById('pm-qty-minus').addEventListener('click', () => {
+          if (State.selectedModalQty > 1) {
+            State.selectedModalQty -= 1;
+            document.getElementById('pm-qty-value').textContent = String(State.selectedModalQty);
+          }
+        });
+        document.getElementById('pm-qty-plus').addEventListener('click', () => {
+          const maxStock = State.activeModalProduct ? State.activeModalProduct.stock : 1;
+          if (State.selectedModalQty < maxStock) {
+            State.selectedModalQty += 1;
+            document.getElementById('pm-qty-value').textContent = String(State.selectedModalQty);
+          } else {
+            showToast(`Maksimal stok tersedia: ${maxStock} pcs.`, 'info');
+          }
+        });
+        document.getElementById('pm-add-to-cart').addEventListener('click', () => {
+          if (!State.activeModalProduct) return;
+          if (addToCart(State.activeModalProduct.id, State.selectedModalSize, State.selectedModalQty)) {
+            closeProductModal();
+          }
+        });
+        document.getElementById('pm-buy-now-wa').addEventListener('click', () => {
+          if (!State.activeModalProduct) return;
+          if (addToCart(State.activeModalProduct.id, State.selectedModalSize, State.selectedModalQty)) {
+            closeProductModal();
+            openCartDrawer();
+          }
+        });
+
+        // Cart Drawer Controls
+        document.getElementById('open-cart-btn').addEventListener('click', openCartDrawer);
+        document.getElementById('close-cart-btn').addEventListener('click', closeCartDrawer);
+        document.getElementById('cart-drawer-backdrop').addEventListener('click', closeCartDrawer);
+        document.getElementById('cart-shop-now-btn').addEventListener('click', () => {
+          closeCartDrawer();
+          document.getElementById('katalog').scrollIntoView({ behavior: 'smooth' });
+        });
+
+        document.getElementById('cart-items-list').addEventListener('click', (e) => {
+          const inc = e.target.closest('[data-cart-inc]');
+          if (inc) updateCartQty(inc.dataset.cartInc, 1);
+          const dec = e.target.closest('[data-cart-dec]');
+          if (dec) updateCartQty(dec.dataset.cartDec, -1);
+        });
+
+        // Promo Code Application
+        document.getElementById('apply-promo-btn').addEventListener('click', () => {
+          const input = document.getElementById('promo-input').value.trim().toUpperCase();
+          const feedback = document.getElementById('promo-feedback');
+          feedback.classList.remove('hidden', 'text-emerald-700', 'text-rose-600');
+
+          const activeCode = (State.settings.promoCode || '').toUpperCase();
+          if (input && activeCode && input === activeCode && State.settings.promoPercent > 0) {
+            State.appliedPromo = { code: activeCode, percent: Number(State.settings.promoPercent) };
+            feedback.textContent = `Kode promo ${activeCode} berhasil diterapkan (-${State.settings.promoPercent}%)!`;
+            feedback.classList.add('text-emerald-700');
+            renderCart();
+          } else {
+            State.appliedPromo = null;
+            feedback.textContent = 'Kode promo tidak valid atau sudah kedaluwarsa.';
+            feedback.classList.add('text-rose-600');
+            renderCart();
+          }
+        });
+
+        // WhatsApp Checkout Execution
+        document.getElementById('wa-checkout-submit-btn').addEventListener('click', () => {
+          const payload = buildWhatsAppOrderPayload();
+          if (payload.error) {
+            if (payload.error !== 'validation') showToast(payload.error, 'error');
+            return;
+          }
+          showToast(`Membuka WhatsApp untuk Pesanan ${payload.orderId}...`, 'success');
+          window.open(payload.waUrl, '_blank', 'noopener,noreferrer');
+        });
+
+        // Copy Order Format
+        document.getElementById('copy-order-summary-btn').addEventListener('click', () => {
+          const payload = buildWhatsAppOrderPayload();
+          if (payload.error) {
+            if (payload.error !== 'validation') showToast(payload.error, 'error');
+            return;
+          }
+          if (copyTextToClipboard(payload.text)) {
+            showToast('Format nota pesanan berhasil disalin!', 'success');
+          } else {
+            showToast('Gagal menyalin teks.', 'error');
+          }
+        });
+
+        // Clear Cart
+        document.getElementById('clear-cart-btn').addEventListener('click', async () => {
+          const ok = await askConfirm(
+            'Kosongkan Keranjang?',
+            'Semua T-Shirt yang ada di dalam keranjang belanja Anda akan dihapus.',
+            'Ya, Kosongkan'
+          );
+          if (!ok) return;
+          State.cart = [];
+          State.appliedPromo = null;
+          persistCart();
+          renderCart();
+          showToast('Keranjang belanja telah dikosongkan.', 'info');
+        });
+
+        // Confirm Modal Buttons
+        document.getElementById('confirm-cancel-btn').addEventListener('click', () => closeConfirm(false));
+        document.getElementById('confirm-ok-btn').addEventListener('click', () => closeConfirm(true));
+
+        // Admin Open / Close
+        document.getElementById('open-admin-btn').addEventListener('click', openAdminModal);
+        document.getElementById('footer-admin-btn').addEventListener('click', openAdminModal);
+        document.querySelectorAll('[data-close-admin]').forEach((btn) => {
+          btn.addEventListener('click', closeAdminModal);
+        });
+        document.getElementById('admin-lock-btn').addEventListener('click', () => {
+          State.admin.unlocked = false;
+          closeProductForm();
+          openAdminModal();
+          showToast('Sesi Admin telah dikunci.', 'info');
+        });
+
+        // Admin Login Form (SHA-256 + Rate Limiting)
+        document.getElementById('admin-login-form').addEventListener('submit', async (e) => {
+          e.preventDefault();
+          const errEl = document.getElementById('admin-auth-error');
+          const now = Date.now();
+
+          if (State.admin.lockoutUntil > now) {
+            const waitSec = Math.ceil((State.admin.lockoutUntil - now) / 1000);
+            errEl.textContent = `Terlalu banyak percobaan gagal. Coba lagi dalam ${waitSec} detik.`;
+            errEl.classList.remove('hidden');
+            return;
+          }
+
+          const entered = document.getElementById('admin-pin-input').value.trim();
+          const hashed = await Security.hashPIN(entered);
+
+          if (hashed === State.settings.pinHash) {
+            State.admin.unlocked = true;
+            State.admin.failedAttempts = 0;
+            errEl.classList.add('hidden');
+            showAdminWorkspace();
+            showToast('Login Admin berhasil.', 'success');
+          } else {
+            State.admin.failedAttempts += 1;
+            if (State.admin.failedAttempts >= 5) {
+              State.admin.lockoutUntil = Date.now() + 30000;
+              State.admin.failedAttempts = 0;
+              errEl.textContent = '5 kali gagal. Akses dikunci sementara selama 30 detik.';
+            } else {
+              errEl.textContent = `PIN tidak sesuai. Sisa percobaan: ${5 - State.admin.failedAttempts}.`;
+            }
+            errEl.classList.remove('hidden');
+          }
+        });
+
+        // Admin Tabs
+        document.querySelectorAll('.admin-tab-btn').forEach((btn) => {
+          btn.addEventListener('click', () => switchAdminTab(btn.dataset.adminTab));
+        });
+
+        // Admin Search
+        document.getElementById('admin-search-input').addEventListener('input', (e) => {
+          State.admin.search = e.target.value;
+          renderAdminProductsTable();
+        });
+
+        // Admin Product Form Controls
+        document.getElementById('open-create-product-btn').addEventListener('click', () => openProductForm(null));
+        document.getElementById('cancel-product-form-btn').addEventListener('click', closeProductForm);
+        document.getElementById('pf-cancel-btn-bottom').addEventListener('click', closeProductForm);
+
         // Select Image File Handler (Compress + Strip EXIF; commit to GitHub on Submit or save to IndexedDB)
         document.getElementById('pf-image-file').addEventListener('change', async (e) => {
           const file = e.target.files && e.target.files[0];
@@ -3368,7 +3627,6 @@
             feedback.classList.add('bg-emerald-50', 'border', 'border-emerald-200', 'text-emerald-800');
             showToast(`Terhubung ke GitHub: ${info.fullName}`, 'success');
           } catch (err) {
-            // Keep settings editable but show clear error
             updateGitHubStatusUI();
             feedback.textContent = err.message || 'Gagal terhubung ke GitHub.';
             feedback.classList.add('bg-rose-50', 'border', 'border-rose-200', 'text-rose-700');
@@ -3410,504 +3668,6 @@
           populateGitHubForm();
           renderAuditChecklist();
           showToast('Token & konfigurasi GitHub dihapus dari browser.', 'info');
-        });
-
-        // Size Guide Modals
-        document.querySelectorAll('[data-open-size-guide]').forEach((btn) => {
-          btn.addEventListener('click', () => {
-            const modal = document.getElementById('size-guide-modal');
-            modal.classList.remove('hidden');
-            modal.classList.add('flex');
-          });
-        });
-        document.getElementById('close-size-guide').addEventListener('click', () => {
-          const modal = document.getElementById('size-guide-modal');
-          modal.classList.add('hidden');
-          modal.classList.remove('flex');
-        });
-        document.getElementById('size-guide-modal').addEventListener('click', (e) => {
-          if (e.target.id === 'size-guide-modal') {
-            e.currentTarget.classList.add('hidden');
-            e.currentTarget.classList.remove('flex');
-          }
-        });
-
-        // Catalog Search, Sort & Category Filtering
-        document.getElementById('catalog-search').addEventListener('input', (e) => {
-          State.filters.search = e.target.value;
-          renderCatalog();
-        });
-        document.getElementById('catalog-sort').addEventListener('change', (e) => {
-          State.filters.sort = e.target.value;
-          renderCatalog();
-        });
-        document.getElementById('category-filters').addEventListener('click', (e) => {
-          const btn = e.target.closest('[data-category]');
-          if (!btn) return;
-          State.filters.category = btn.dataset.category;
-          renderCatalog();
-        });
-        document.getElementById('reset-filter-btn').addEventListener('click', () => {
-          State.filters = { search: '', category: 'Semua', sort: 'featured' };
-          document.getElementById('catalog-search').value = '';
-          document.getElementById('catalog-sort').value = 'featured';
-          renderCatalog();
-        });
-
-        // Product Grid Delegation (Open Detail / Quick Add)
-        document.getElementById('product-grid').addEventListener('click', (e) => {
-          const quickAddBtn = e.target.closest('[data-quick-add]');
-          if (quickAddBtn) {
-            const prod = State.products.find((p) => p.id === quickAddBtn.dataset.quickAdd);
-            if (prod) {
-              const defaultSize = (prod.sizes && prod.sizes[0]) || 'M';
-              addToCart(prod.id, defaultSize, 1);
-            }
-            return;
-          }
-          const openBtn = e.target.closest('[data-open-product]');
-          if (openBtn) {
-            openProductModal(openBtn.dataset.openProduct);
-          }
-        });
-
-        // Product Detail Modal Interactions
-        document.getElementById('close-product-modal').addEventListener('click', closeProductModal);
-        document.getElementById('product-modal').addEventListener('click', (e) => {
-          if (e.target.id === 'product-modal') closeProductModal();
-        });
-        document.getElementById('pm-sizes').addEventListener('click', (e) => {
-          const btn = e.target.closest('[data-select-size]');
-          if (!btn) return;
-          State.selectedModalSize = btn.dataset.selectSize;
-          renderModalSizes();
-        });
-        document.getElementById('pm-qty-minus').addEventListener('click', () => {
-          if (State.selectedModalQty > 1) {
-            State.selectedModalQty -= 1;
-            document.getElementById('pm-qty-value').textContent = String(State.selectedModalQty);
-          }
-        });
-        document.getElementById('pm-qty-plus').addEventListener('click', () => {
-          const maxStock = State.activeModalProduct ? State.activeModalProduct.stock : 1;
-          if (State.selectedModalQty < maxStock) {
-            State.selectedModalQty += 1;
-            document.getElementById('pm-qty-value').textContent = String(State.selectedModalQty);
-          } else {
-            showToast(`Maksimal stok tersedia: ${maxStock} pcs.`, 'info');
-          }
-        });
-        document.getElementById('pm-add-to-cart').addEventListener('click', () => {
-          if (!State.activeModalProduct) return;
-          if (addToCart(State.activeModalProduct.id, State.selectedModalSize, State.selectedModalQty)) {
-            closeProductModal();
-          }
-        });
-        document.getElementById('pm-buy-now-wa').addEventListener('click', () => {
-          if (!State.activeModalProduct) return;
-          if (addToCart(State.activeModalProduct.id, State.selectedModalSize, State.selectedModalQty)) {
-            closeProductModal();
-            openCartDrawer();
-          }
-        });
-
-        // Cart Drawer Controls
-        document.getElementById('open-cart-btn').addEventListener('click', openCartDrawer);
-        document.getElementById('close-cart-btn').addEventListener('click', closeCartDrawer);
-        document.getElementById('cart-drawer-backdrop').addEventListener('click', closeCartDrawer);
-        document.getElementById('cart-shop-now-btn').addEventListener('click', () => {
-          closeCartDrawer();
-          document.getElementById('katalog').scrollIntoView({ behavior: 'smooth' });
-        });
-
-        document.getElementById('cart-items-list').addEventListener('click', (e) => {
-          const inc = e.target.closest('[data-cart-inc]');
-          if (inc) updateCartQty(inc.dataset.cartInc, 1);
-          const dec = e.target.closest('[data-cart-dec]');
-          if (dec) updateCartQty(dec.dataset.cartDec, -1);
-        });
-
-        // Promo Code Application
-        document.getElementById('apply-promo-btn').addEventListener('click', () => {
-          const input = document.getElementById('promo-input').value.trim().toUpperCase();
-          const feedback = document.getElementById('promo-feedback');
-          feedback.classList.remove('hidden', 'text-emerald-700', 'text-rose-600');
-
-          const activeCode = (State.settings.promoCode || '').toUpperCase();
-          if (input && activeCode && input === activeCode && State.settings.promoPercent > 0) {
-            State.appliedPromo = { code: activeCode, percent: Number(State.settings.promoPercent) };
-            feedback.textContent = `Kode promo ${activeCode} berhasil diterapkan (-${State.settings.promoPercent}%)!`;
-            feedback.classList.add('text-emerald-700');
-            renderCart();
-          } else {
-            State.appliedPromo = null;
-            feedback.textContent = 'Kode promo tidak valid atau sudah kedaluwarsa.';
-            feedback.classList.add('text-rose-600');
-            renderCart();
-          }
-        });
-
-        // WhatsApp Checkout Execution
-        document.getElementById('wa-checkout-submit-btn').addEventListener('click', () => {
-          const payload = buildWhatsAppOrderPayload();
-          if (payload.error) {
-            if (payload.error !== 'validation') showToast(payload.error, 'error');
-            return;
-          }
-          showToast(`Membuka WhatsApp untuk Pesanan ${payload.orderId}...`, 'success');
-          window.open(payload.waUrl, '_blank', 'noopener,noreferrer');
-        });
-
-        // Copy Order Format
-        document.getElementById('copy-order-summary-btn').addEventListener('click', () => {
-          const payload = buildWhatsAppOrderPayload();
-          if (payload.error) {
-            if (payload.error !== 'validation') showToast(payload.error, 'error');
-            return;
-          }
-          if (copyTextToClipboard(payload.text)) {
-            showToast('Format nota pesanan berhasil disalin!', 'success');
-          } else {
-            showToast('Gagal menyalin teks.', 'error');
-          }
-        });
-
-        // Clear Cart
-        document.getElementById('clear-cart-btn').addEventListener('click', async () => {
-          const ok = await askConfirm(
-            'Kosongkan Keranjang?',
-            'Semua T-Shirt yang ada di dalam keranjang belanja Anda akan dihapus.',
-            'Ya, Kosongkan'
-          );
-          if (!ok) return;
-          State.cart = [];
-          State.appliedPromo = null;
-          persistCart();
-          renderCart();
-          showToast('Keranjang belanja telah dikosongkan.', 'info');
-        });
-
-        // Confirm Modal Buttons
-        document.getElementById('confirm-cancel-btn').addEventListener('click', () => closeConfirm(false));
-        document.getElementById('confirm-ok-btn').addEventListener('click', () => closeConfirm(true));
-
-        // Admin Open / Close
-        document.getElementById('open-admin-btn').addEventListener('click', openAdminModal);
-        document.getElementById('footer-admin-btn').addEventListener('click', openAdminModal);
-        document.querySelectorAll('[data-close-admin]').forEach((btn) => {
-          btn.addEventListener('click', closeAdminModal);
-        });
-        document.getElementById('admin-lock-btn').addEventListener('click', () => {
-          State.admin.unlocked = false;
-          closeProductForm();
-          openAdminModal();
-          showToast('Sesi Admin telah dikunci.', 'info');
-        });
-
-        // Admin Login Form (SHA-256 + Rate Limiting)
-        document.getElementById('admin-login-form').addEventListener('submit', async (e) => {
-          e.preventDefault();
-          const errEl = document.getElementById('admin-auth-error');
-          const now = Date.now();
-
-          if (State.admin.lockoutUntil > now) {
-            const waitSec = Math.ceil((State.admin.lockoutUntil - now) / 1000);
-            errEl.textContent = `Terlalu banyak percobaan gagal. Coba lagi dalam ${waitSec} detik.`;
-            errEl.classList.remove('hidden');
-            return;
-          }
-
-          const entered = document.getElementById('admin-pin-input').value.trim();
-          const hashed = await Security.hashPIN(entered);
-
-          if (hashed === State.settings.pinHash) {
-            State.admin.unlocked = true;
-            State.admin.failedAttempts = 0;
-            errEl.classList.add('hidden');
-            showAdminWorkspace();
-            showToast('Login Admin berhasil.', 'success');
-          } else {
-            State.admin.failedAttempts += 1;
-            if (State.admin.failedAttempts >= 5) {
-              State.admin.lockoutUntil = Date.now() + 30000;
-              State.admin.failedAttempts = 0;
-              errEl.textContent = '5 kali gagal. Akses dikunci sementara selama 30 detik.';
-            } else {
-              errEl.textContent = `PIN tidak sesuai. Sisa percobaan: ${5 - State.admin.failedAttempts}.`;
-            }
-            errEl.classList.remove('hidden');
-          }
-        });
-
-        // Admin Tabs
-        document.querySelectorAll('.admin-tab-btn').forEach((btn) => {
-          btn.addEventListener('click', () => switchAdminTab(btn.dataset.adminTab));
-        });
-
-        // Admin Search
-        document.getElementById('admin-search-input').addEventListener('input', (e) => {
-          State.admin.search = e.target.value;
-          renderAdminProductsTable();
-        });
-
-        // Admin Product Form Controls
-        document.getElementById('open-create-product-btn').addEventListener('click', () => openProductForm(null));
-        document.getElementById('cancel-product-form-btn').addEventListener('click', closeProductForm);
-        document.getElementById('pf-cancel-btn-bottom').addEventListener('click', closeProductForm);
-
-        // Select Image File Handler (Compress + Strip EXIF + Store in IndexedDB)
-        document.getElementById('pf-image-file').addEventListener('change', async (e) => {
-          const file = e.target.files && e.target.files[0];
-          if (!file) return;
-          const statusEl = document.getElementById('pf-upload-status');
-          const clearBtn = document.getElementById('pf-clear-upload-btn');
-          const errBox = document.getElementById('pf-error');
-
-          try {
-            errBox.classList.add('hidden');
-            statusEl.textContent = 'Mengompresi & memproses gambar...';
-            statusEl.classList.remove('hidden');
-
-            const saved = await ImageStore.saveFile(file);
-            document.getElementById('pf-uploaded-ref').value = saved.ref;
-            document.getElementById('pf-image').value = '';
-            document.getElementById('pf-image-preview').src = saved.objectUrl;
-            statusEl.textContent = `Gambar siap (${saved.sizeKB} KB, otomatis dikompresi${saved.persisted ? ' & tersimpan di IndexedDB' : ''}).`;
-            clearBtn.classList.remove('hidden');
-            showToast(`Gambar "${file.name}" berhasil dipilih (${saved.sizeKB} KB).`, 'success');
-          } catch (err) {
-            statusEl.classList.add('hidden');
-            errBox.textContent = err.message || 'Gagal mengunggah gambar.';
-            errBox.classList.remove('hidden');
-            e.target.value = '';
-          }
-        });
-
-        // Clear selected local image
-        document.getElementById('pf-clear-upload-btn').addEventListener('click', () => {
-          document.getElementById('pf-uploaded-ref').value = '';
-          document.getElementById('pf-image-file').value = '';
-          document.getElementById('pf-upload-status').classList.add('hidden');
-          document.getElementById('pf-clear-upload-btn').classList.add('hidden');
-          const urlVal = document.getElementById('pf-image').value.trim();
-          document.getElementById('pf-image-preview').src = Security.sanitizeUrl(
-            urlVal,
-            'https://placehold.co/120x150/18181b/f4f4f5?text=Preview'
-          );
-        });
-
-        // Direct Image URL Input Handler
-        document.getElementById('pf-image').addEventListener('input', (e) => {
-          const val = e.target.value.trim();
-          if (val) {
-            document.getElementById('pf-uploaded-ref').value = '';
-            document.getElementById('pf-upload-status').classList.add('hidden');
-            document.getElementById('pf-clear-upload-btn').classList.add('hidden');
-          }
-          document.getElementById('pf-image-preview').src = Security.sanitizeUrl(
-            val,
-            'https://placehold.co/120x150/18181b/f4f4f5?text=Preview'
-          );
-        });
-
-        // Admin Create / Update Product Submit
-        document.getElementById('admin-product-form').addEventListener('submit', (e) => {
-          e.preventDefault();
-          const errBox = document.getElementById('pf-error');
-          const id = document.getElementById('pf-id').value.trim();
-          const name = document.getElementById('pf-name').value.trim();
-          const category = document.getElementById('pf-category').value;
-          const color = document.getElementById('pf-color').value.trim();
-          const price = Number(document.getElementById('pf-price').value);
-          const originalPrice = Number(document.getElementById('pf-original-price').value) || 0;
-          const stock = Number(document.getElementById('pf-stock').value);
-          const badge = document.getElementById('pf-badge').value;
-          const uploadedRef = document.getElementById('pf-uploaded-ref').value.trim();
-          const rawImage = document.getElementById('pf-image').value.trim();
-          const description = document.getElementById('pf-description').value.trim();
-          const sizes = Array.from(document.querySelectorAll('input[name="pf-sizes"]:checked')).map((c) => c.value);
-
-          // Strict Validation (QA & Security)
-          if (name.length < 3) {
-            errBox.textContent = 'Nama produk minimal 3 karakter.';
-            errBox.classList.remove('hidden');
-            return;
-          }
-          if (!Number.isFinite(price) || price < 1000) {
-            errBox.textContent = 'Harga jual minimal Rp 1.000.';
-            errBox.classList.remove('hidden');
-            return;
-          }
-          if (!Number.isFinite(stock) || stock < 0) {
-            errBox.textContent = 'Stok tidak boleh bernilai negatif.';
-            errBox.classList.remove('hidden');
-            return;
-          }
-          if (sizes.length === 0) {
-            errBox.textContent = 'Pilih minimal 1 ukuran tersedia (S/M/L/XL/XXL).';
-            errBox.classList.remove('hidden');
-            return;
-          }
-          if (!uploadedRef && !rawImage) {
-            errBox.textContent = 'Pilih gambar dari perangkat atau tempel link URL gambar.';
-            errBox.classList.remove('hidden');
-            return;
-          }
-          if (!uploadedRef && rawImage && !/^https?:\/\//i.test(rawImage)) {
-            errBox.textContent = 'Link gambar harus diawali protokol http:// atau https://.';
-            errBox.classList.remove('hidden');
-            return;
-          }
-          if (description.length < 10) {
-            errBox.textContent = 'Deskripsi produk minimal 10 karakter.';
-            errBox.classList.remove('hidden');
-            return;
-          }
-
-          const finalImageRef = uploadedRef ? uploadedRef : Security.sanitizeUrl(rawImage);
-          errBox.classList.add('hidden');
-
-          if (id) {
-            // UPDATE
-            const idx = State.products.findIndex((p) => p.id === id);
-            if (idx !== -1) {
-              State.products[idx] = {
-                ...State.products[idx],
-                name,
-                category,
-                color: color || 'Default',
-                price,
-                originalPrice,
-                stock,
-                badge,
-                sizes,
-                image: finalImageRef,
-                description
-              };
-              showToast(`Produk "${name}" berhasil diperbarui.`, 'success');
-            }
-          } else {
-            // CREATE
-            const newProduct = {
-              id: `kw-${Date.now().toString(36)}`,
-              name,
-              category,
-              color: color || 'Default',
-              price,
-              originalPrice,
-              stock,
-              badge,
-              sizes,
-              image: finalImageRef,
-              description,
-              createdAt: Math.floor(Date.now() / 1000)
-            };
-            State.products.unshift(newProduct);
-            showToast(`Produk baru "${name}" berhasil ditambahkan!`, 'success');
-          }
-
-          persistProducts();
-          closeProductForm();
-          renderAdminStats();
-          renderAdminProductsTable();
-          renderCatalog();
-          renderCart();
-        });
-
-        // Admin Table Row Actions (Quick Stock +/-, Edit, Delete)
-        document.getElementById('admin-products-tbody').addEventListener('click', async (e) => {
-          const incBtn = e.target.closest('[data-quick-stock-inc]');
-          if (incBtn) {
-            const p = State.products.find((x) => x.id === incBtn.dataset.quickStockInc);
-            if (p) {
-              p.stock += 1;
-              persistProducts();
-              renderAdminStats();
-              renderAdminProductsTable();
-              renderCatalog();
-            }
-            return;
-          }
-
-          const decBtn = e.target.closest('[data-quick-stock-dec]');
-          if (decBtn) {
-            const p = State.products.find((x) => x.id === decBtn.dataset.quickStockDec);
-            if (p && p.stock > 0) {
-              p.stock -= 1;
-              persistProducts();
-              renderAdminStats();
-              renderAdminProductsTable();
-              renderCatalog();
-              renderCart();
-            }
-            return;
-          }
-
-          const editBtn = e.target.closest('[data-edit-product]');
-          if (editBtn) {
-            const p = State.products.find((x) => x.id === editBtn.dataset.editProduct);
-            if (p) openProductForm(p);
-            return;
-          }
-
-          const delBtn = e.target.closest('[data-delete-product]');
-          if (delBtn) {
-            const p = State.products.find((x) => x.id === delBtn.dataset.deleteProduct);
-            if (!p) return;
-            const ok = await askConfirm(
-              'Hapus Produk dari Katalog?',
-              `Anda yakin ingin menghapus "${p.name}" secara permanen dari penyimpanan lokal?`,
-              'Ya, Hapus'
-            );
-            if (!ok) return;
-            const deletedImageRef = p.image;
-            State.products = State.products.filter((x) => x.id !== p.id);
-            if (String(deletedImageRef || '').startsWith('idb://')) {
-              const stillUsed = State.products.some((x) => x.image === deletedImageRef);
-              if (!stillUsed) await ImageStore.remove(deletedImageRef);
-            }
-            persistProducts();
-            renderAdminStats();
-            renderAdminProductsTable();
-            renderCatalog();
-            renderCart();
-            showToast(`Produk "${p.name}" telah dihapus.`, 'info');
-          }
-        });
-
-        // Admin Store Settings Submit
-        document.getElementById('admin-settings-form').addEventListener('submit', async (e) => {
-          e.preventDefault();
-          const storeName = document.getElementById('set-store-name').value.trim();
-          const waNumber = Security.normalizeWAPhone(document.getElementById('set-wa-number').value);
-          const promoCode = document.getElementById('set-promo-code').value.trim().toUpperCase();
-          const promoPercent = Math.min(80, Math.max(0, Number(document.getElementById('set-promo-pct').value) || 0));
-          const newPin = document.getElementById('set-new-pin').value.trim();
-
-          if (storeName.length < 2) {
-            showToast('Nama toko minimal 2 karakter.', 'error');
-            return;
-          }
-          if (waNumber.length < 10) {
-            showToast('Nomor WhatsApp Admin tidak valid (gunakan awalan 628...).', 'error');
-            return;
-          }
-          if (newPin && (newPin.length < 6 || !/^\d+$/.test(newPin))) {
-            showToast('PIN baru harus berupa minimal 6 digit angka.', 'error');
-            return;
-          }
-
-          State.settings.storeName = storeName;
-          State.settings.waNumber = waNumber;
-          State.settings.promoCode = promoCode;
-          State.settings.promoPercent = promoPercent;
-          if (newPin) {
-            State.settings.pinHash = await Security.hashPIN(newPin);
-            document.getElementById('set-new-pin').value = '';
-          }
-
-          persistSettings();
-          showToast('Konfigurasi toko & WhatsApp berhasil disimpan!', 'success');
         });
 
         // Export JSON Catalog

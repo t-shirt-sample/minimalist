@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-11-22T20:03:30.037Z",
+  "updatedAt": "2026-11-22T20:07:30.889Z",
   "store": {
     "storeName": "KANE.WEAR",
     "waNumber": "6282153261630",
@@ -21,6 +21,32 @@
   ],
   "products": [
     {
+      "id": "kw-mws9qi4i",
+      "name": "Coba tambah produk",
+      "category": "Graphic Series",
+      "color": "Putih",
+      "price": 180000,
+      "originalPrice": 200000,
+      "stock": 15,
+      "badge": "Limited",
+      "sizes": [
+        "S",
+        "M",
+        "L",
+        "XL"
+      ],
+      "image": "images/products/coba-tambah-produk-1-mws9q603.jpg",
+      "images": [
+        "images/products/coba-tambah-produk-1-mws9q603.jpg",
+        "images/products/coba-tambah-produk-2-mws9q8ix.jpg",
+        "images/products/coba-tambah-produk-3-mws9qb91.jpg",
+        "images/products/coba-tambah-produk-4-mws9qdsp.jpg",
+        "images/products/coba-tambah-produk-5-mws9qfwl.jpg"
+      ],
+      "description": "Coba tambah produk tanpa edit foto produk, karena kalo edit foto produk, produk tidak terupdate.",
+      "createdAt": 1795378050
+    },
+    {
       "id": "kw-mws6tga2",
       "name": "Coba Input Produk",
       "category": "Heavyweight",
@@ -34,9 +60,13 @@
         "L",
         "XL"
       ],
-      "image": "images/products/coba-input-produk-1-mws9l87p.jpg",
+      "image": "images/products/coba-input-produk-1-mws6t0u1.jpg",
       "images": [
-        "images/products/coba-input-produk-1-mws9l87p.jpg"
+        "images/products/coba-input-produk-1-mws6t0u1.jpg",
+        "images/products/coba-input-produk-2-mws6t64d.jpg",
+        "images/products/coba-input-produk-3-mws6t9an.jpg",
+        "images/products/coba-input-produk-4-mws6tbg2.jpg",
+        "images/products/coba-input-produk-5-mws6tdkr.jpg"
       ],
       "description": "Ini mah coba input produk + upload gambar lebih dari 1 sama tes pagination aja jalan apa nggak.",
       "createdAt": 1795373149

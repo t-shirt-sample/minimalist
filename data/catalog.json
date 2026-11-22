@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-11-22T20:02:04.471Z",
+  "updatedAt": "2026-11-22T20:03:30.037Z",
   "store": {
     "storeName": "KANE.WEAR",
     "waNumber": "6282153261630",
@@ -34,13 +34,9 @@
         "L",
         "XL"
       ],
-      "image": "images/products/coba-input-produk-1-mws9iv6q.jpg",
+      "image": "images/products/coba-input-produk-1-mws9l87p.jpg",
       "images": [
-        "images/products/coba-input-produk-1-mws9iv6q.jpg",
-        "images/products/coba-input-produk-2-mws9ixm8.jpg",
-        "images/products/coba-input-produk-3-mws9izy3.jpg",
-        "images/products/coba-input-produk-4-mws9j27c.jpg",
-        "images/products/coba-input-produk-5-mws9j4vh.jpg"
+        "images/products/coba-input-produk-1-mws9l87p.jpg"
       ],
       "description": "Ini mah coba input produk + upload gambar lebih dari 1 sama tes pagination aja jalan apa nggak.",
       "createdAt": 1795373149

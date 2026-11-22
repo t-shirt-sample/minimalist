@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-11-22T16:53:44.419Z",
+  "updatedAt": "2026-11-22T17:19:40.820Z",
   "store": {
     "storeName": "KANA.WEAR",
     "waNumber": "6282153261630",
@@ -7,23 +7,6 @@
     "promoPercent": 10
   },
   "products": [
-    {
-      "id": "kw-mws1v3f0",
-      "name": "Tes Upload Produk Baru",
-      "category": "Heavyweight",
-      "color": "Cokelat",
-      "price": 150000,
-      "originalPrice": 200000,
-      "stock": 10,
-      "badge": "",
-      "sizes": [
-        "M",
-        "L"
-      ],
-      "image": "./images/products/tes-upload-produk-baru-mws1v031.jpg",
-      "description": "Ini gambar tes upload produk baru",
-      "createdAt": 1795364828
-    },
     {
       "id": "kw-101",
       "name": "Kana Heavyweight Boxy Tee — Jet Black",

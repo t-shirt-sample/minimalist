@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-11-22T20:13:45.013Z",
+  "updatedAt": "2026-11-22T20:24:56.915Z",
   "store": {
     "storeName": "KANE.WEAR",
     "waNumber": "6282153261630",
@@ -20,31 +20,6 @@
     "Sale"
   ],
   "products": [
-    {
-      "id": "kw-mws6tga2",
-      "name": "Coba Input Produk",
-      "category": "Heavyweight",
-      "color": "Putih",
-      "price": 180000,
-      "originalPrice": 200000,
-      "stock": 10,
-      "badge": "Limited",
-      "sizes": [
-        "M",
-        "L",
-        "XL"
-      ],
-      "image": "images/products/coba-input-produk-1-mws9xxyy.jpg",
-      "images": [
-        "images/products/coba-input-produk-1-mws9xxyy.jpg",
-        "images/products/coba-input-produk-2-mws9y0nx.jpg",
-        "images/products/coba-input-produk-3-mws9y30s.jpg",
-        "images/products/coba-input-produk-4-mws9y5fs.jpg",
-        "images/products/coba-input-produk-5-mws9y7qh.jpg"
-      ],
-      "description": "Ini mah coba input produk + upload gambar lebih dari 1 sama tes pagination aja jalan apa nggak.",
-      "createdAt": 1795373149
-    },
     {
       "id": "kw-101",
       "name": "Kana Heavyweight Boxy Tee — Jet Black",

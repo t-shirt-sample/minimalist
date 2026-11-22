@@ -1,0 +1,125 @@
+{
+  "updatedAt": "2026-11-22T16:19:32.577Z",
+  "store": {
+    "storeName": "KANA.WEAR",
+    "waNumber": "6281234567890",
+    "promoCode": "KANA10",
+    "promoPercent": 10
+  },
+  "products": [
+    {
+      "id": "kw-101",
+      "name": "Kana Heavyweight Boxy Tee — Jet Black",
+      "category": "Heavyweight",
+      "color": "Jet Black",
+      "price": 189000,
+      "originalPrice": 229000,
+      "stock": 24,
+      "sizes": [
+        "S",
+        "M",
+        "L",
+        "XL",
+        "XXL"
+      ],
+      "badge": "Best Seller",
+      "image": "https://images.unsplash.com/photo-1583743814966-8936f5b7be1a?auto=format&fit=crop&w=800&q=80",
+      "description": "Kaos potongan boxy berbahan 100% Heavyweight Cotton 240gsm dengan tekstur kokoh namun tetap sejuk. Rib kerah tebal 2.8cm anti-melar untuk tampilan minimalis sehari-hari.",
+      "createdAt": 1730000006
+    },
+    {
+      "id": "kw-102",
+      "name": "Nusa Oversized Graphic Tee — Broken White",
+      "category": "Graphic Series",
+      "color": "Broken White",
+      "price": 215000,
+      "originalPrice": 0,
+      "stock": 16,
+      "sizes": [
+        "M",
+        "L",
+        "XL",
+        "XXL"
+      ],
+      "badge": "New Drop",
+      "image": "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&w=800&q=80",
+      "description": "Menggunakan teknik sablon plastisol high-density yang tahan cuci. Potongan drop-shoulder oversized dengan warna broken white natural yang mudah dipadukan dengan celana cargo atau denim.",
+      "createdAt": 1730000005
+    },
+    {
+      "id": "kw-103",
+      "name": "Essential Cotton Combed 20s — Slate Grey",
+      "category": "Basic Essentials",
+      "color": "Slate Grey",
+      "price": 159000,
+      "originalPrice": 185000,
+      "stock": 32,
+      "sizes": [
+        "S",
+        "M",
+        "L",
+        "XL"
+      ],
+      "badge": "Sale",
+      "image": "https://images.unsplash.com/photo-1576566588028-4147f3842f27?auto=format&fit=crop&w=800&q=80",
+      "description": "Kaos esensial harian berbahan Cotton Combed 20s 200gsm. Menyerap keringat dengan optimal, lembut di kulit, dan hadir dalam warna abu-abu slate yang timeless.",
+      "createdAt": 1730000004
+    },
+    {
+      "id": "kw-104",
+      "name": "Urban Kinetic Acid Wash Tee — Charcoal",
+      "category": "Washed Vintage",
+      "color": "Charcoal Wash",
+      "price": 235000,
+      "originalPrice": 265000,
+      "stock": 4,
+      "sizes": [
+        "M",
+        "L",
+        "XL"
+      ],
+      "badge": "Limited",
+      "image": "https://images.unsplash.com/photo-1503341504253-dff4815485f1?auto=format&fit=crop&w=800&q=80",
+      "description": "Diproses dengan metode enzyme & acid wash artisanal sehingga setiap potong kaos memiliki pola tekstur vintage yang unik. Stok sangat terbatas untuk Drop 04.",
+      "createdAt": 1730000003
+    },
+    {
+      "id": "kw-105",
+      "name": "Minimalist Studio Pocket Tee — Sand",
+      "category": "Basic Essentials",
+      "color": "Sand Beige",
+      "price": 169000,
+      "originalPrice": 0,
+      "stock": 19,
+      "sizes": [
+        "S",
+        "M",
+        "L",
+        "XL"
+      ],
+      "badge": "",
+      "image": "https://images.unsplash.com/photo-1562157873-818bc0726f68?auto=format&fit=crop&w=800&q=80",
+      "description": "Dilengkapi saku dada fungsional dengan jahitan bar-tack penguat dan label woven minimalis di tepi bawah. Warna sand earth-tone yang bersih dan kasual.",
+      "createdAt": 1730000002
+    },
+    {
+      "id": "kw-106",
+      "name": "Monolith Heavy Longsleeve — Midnight",
+      "category": "Longsleeve",
+      "color": "Midnight Navy",
+      "price": 249000,
+      "originalPrice": 279000,
+      "stock": 11,
+      "sizes": [
+        "M",
+        "L",
+        "XL",
+        "XXL"
+      ],
+      "badge": "New Drop",
+      "image": "https://images.unsplash.com/photo-1618354691373-d851c5c3a990?auto=format&fit=crop&w=800&q=80",
+      "description": "Kaos lengan panjang dengan rib pergelangan elastis dan potongan relaxed fit. Ideal untuk gaya layering maupun berkendara di malam hari.",
+      "createdAt": 1730000001
+    }
+  ]
+}

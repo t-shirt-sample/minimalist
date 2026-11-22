@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-11-22T17:41:58.938Z",
+  "updatedAt": "2026-11-22T17:43:35.321Z",
   "store": {
     "storeName": "KANA.WEAR",
     "waNumber": "6282153261630",
@@ -72,7 +72,7 @@
       "color": "Charcoal Wash",
       "price": 235000,
       "originalPrice": 265000,
-      "stock": 1,
+      "stock": 4,
       "sizes": [
         "M",
         "L",

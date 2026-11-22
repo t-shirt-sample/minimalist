@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-11-22T20:08:37.593Z",
+  "updatedAt": "2026-11-22T20:10:21.016Z",
   "store": {
     "storeName": "KANE.WEAR",
     "waNumber": "6282153261630",
@@ -35,13 +35,9 @@
         "L",
         "XL"
       ],
-      "image": "images/products/coba-tambah-produk-1-mws9q603.jpg",
+      "image": "images/products/coba-tambah-produk-1-mws9u1dy.jpg",
       "images": [
-        "images/products/coba-tambah-produk-1-mws9q603.jpg",
-        "images/products/coba-tambah-produk-2-mws9q8ix.jpg",
-        "images/products/coba-tambah-produk-3-mws9qb91.jpg",
-        "images/products/coba-tambah-produk-4-mws9qdsp.jpg",
-        "images/products/coba-tambah-produk-5-mws9qfwl.jpg"
+        "images/products/coba-tambah-produk-1-mws9u1dy.jpg"
       ],
       "description": "Coba tambah produk tanpa edit foto produk, karena kalo edit foto produk, produk tidak terupdate.",
       "createdAt": 1795378050

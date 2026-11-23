@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-11-23T12:57:04.338Z",
+  "updatedAt": "2026-11-23T13:19:00.909Z",
   "settings": {
     "brandName": "KANA.WEAR",
     "waNumber": "6281234567890",
@@ -19,31 +19,6 @@
     "Sale"
   ],
   "products": [
-    {
-      "id": "kw-mwsasgpz",
-      "name": "Coba Input Produk Mozila",
-      "category": "Graphic Series",
-      "color": "Putih",
-      "price": 190000,
-      "originalPrice": 220000,
-      "stock": 10,
-      "badge": "Limited",
-      "sizes": [
-        "M",
-        "L",
-        "XL"
-      ],
-      "image": "images/products/coba-input-produk-mozila-1-mwsas5z8.jpg",
-      "images": [
-        "images/products/coba-input-produk-mozila-1-mwsas5z8.jpg",
-        "images/products/coba-input-produk-mozila-2-mwsas8ds.jpg",
-        "images/products/coba-input-produk-mozila-3-mwsasaln.jpg",
-        "images/products/coba-input-produk-mozila-4-mwsascff.jpg",
-        "images/products/coba-input-produk-mozila-5-mwsaselp.jpg"
-      ],
-      "description": "Coba Input Produk lewat Browser Mozila",
-      "createdAt": 1795379821
-    },
     {
       "id": "kw-101",
       "name": "Kana Heavyweight Boxy Tee — Jet Black",
